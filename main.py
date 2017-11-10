@@ -2,6 +2,8 @@
 # Created by lihang on 2017/3/23.
 import tornado.web
 from tornado.options import define, options
+
+from mod.empty_classroom.hander import EmptyClassroom
 from mod.library.searchhandler import LibSearchHandler
 from mod.gpa.hander import GPAHandler
 from mod.auth.hander import AuthHandler
@@ -13,7 +15,8 @@ class Application(tornado.web.Application):
         handlers = [
             (r'/webserv1/auth', AuthHandler),
             (r'/webserv1/gpa', GPAHandler),
-            (r'/webserv1/search',LibSearchHandler)
+            (r'/webserv1/search',LibSearchHandler),
+            (r'/webserv1/empty_classroom',EmptyClassroom)
         ]
         settings = dict(
             debug=True

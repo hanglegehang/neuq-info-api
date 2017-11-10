@@ -14,12 +14,10 @@ class GPAHandler(tornado.web.RequestHandler):
         self.finish()
 
     def post(self):
-        global ret
         body = json.loads(self.request.body.decode('utf-8'))
         crypt = AESCipher()
         deParam = crypt.decrypt(body['raw_data'])
         param = json.loads(deParam)
-        print deParam
         username = param['card_number']
         password = param['password']
         app_key = body['app_key']
@@ -34,12 +32,11 @@ class GPAHandler(tornado.web.RequestHandler):
                      'queryModel.currentPage': '1', 'queryModel.sortName': '', 'queryModel.sortOrder': 'asc',
                      'time': '1'}
             r2 = s.post(QUERY_URL2 % username, data=data3)
-            # print r2.text
             retjson = {'result': self.parser(r2.text), 'card_number': username}
-            result = {'raw_data': crypt.encrypt(json.dumps(retjson)), 'code': 0, 'message': '', 'app_key': app_key}
-            # result = {'raw_data': retjson, 'code': 0, 'message': '', 'app_key': app_key}
+            # result = {'raw_data': crypt.encrypt(json.dumps(retjson)), 'code': 0, 'message': '', 'app_key': app_key}
+            result = {'raw_data': retjson, 'code': 0, 'message': '', 'app_key': app_key}
             ret = json.dumps(result, ensure_ascii=False, indent=2)
-        self.write(ret)
+            self.write(ret)
         self.finish()
 
     def parser(self, content):
