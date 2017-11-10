@@ -1,14 +1,14 @@
 # coding:utf-8
 # Created by lihang on 2017/3/23.
 
-HEADER = "User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+header={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
 # 教务系统主页
-INDEX_URL1 = "http://202.206.20.180/jwglxt/xtgl/login_slogin.html"
+INDEX_URL = "http://202.206.20.180/jwglxt/xtgl/login_slogin.html"
 # 获取公钥地址
 PUBLIC_KEY_URL2 = "http://202.206.20.180/jwglxt/xtgl/login_getPublicKey.html"
 # 验证账号密码
 CHECK_USER_USER = "http://202.206.20.180/jwglxt/xtgl/login_slogin.html"
-TIME_OUT = 8
+TIME_OUT = 4
 
 '''
 {
@@ -34,6 +34,7 @@ TIME_OUT = 8
     "timestamp":"",(时间戳)
     "sign":"9A0A8659F005D6984697E2CA0A9CF3B7"//签名
 }
+接口测试数据
 {
     "raw_data":"20864091e31fa8a0a56f3748798de919fd604691e95cc542202614af9521a6122f4869701bfd1cff5bb311a8b5f2853cc9a228de5d40f3d71f70dbd1f618b88e2c4a3d4a7139ce7ba9ba14947df3939aa45b1384382c8b46fdf7dcca4524c4aee773304b1c9474265661f82f6c975fca7c2a419c62ffe42670696877d9a57393f3547a5c48fdc570044324b29e4d7a35393a56b0202cad76104ef81f52508738aaee1314f1ea83d9d5cb306a1846bbd2",
     "app_key":"APP_KEY"
