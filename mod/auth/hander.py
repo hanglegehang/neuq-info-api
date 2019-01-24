@@ -30,7 +30,7 @@ class AuthHandler(tornado.web.RequestHandler):
         actResult = authApi(username, password)
         if (actResult.has_key('cookie')):
             del actResult['cookie']
-        print json.dumps(actResult, ensure_ascii=False, indent=2)
+        print actResult
         self.write(json.dumps(actResult, ensure_ascii=False, indent=2))
         self.finish()
 
