@@ -54,7 +54,7 @@ class GPAHandler(tornado.web.RequestHandler):
                 'courseName': item['kcmc'],
                 'score': item['cj'],
                 'credit': item['xf'],
-                "gpa": item['jd'] if item.has_key('js') else '',
+                "gpa": item['jd'] if item.has_key('jd') else '',
                 "examType": item['ksxz'],
                 "isExamInvalid": item['sfxwkc'],
                 "semester": xqKey
