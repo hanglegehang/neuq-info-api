@@ -13,10 +13,10 @@ define('port', default=7005, help='run on the given port', type =int)
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r'/webserv1/auth', AuthHandler),
-            (r'/webserv1/gpa', GPAHandler),
-            (r'/webserv1/search',LibSearchHandler),
-            (r'/webserv1/empty_classroom',EmptyClassroom)
+            (r'/api/auth', AuthHandler),
+            (r'/api/gpa', GPAHandler),
+            (r'/api/search',LibSearchHandler),
+            (r'/api/empty_classroom',EmptyClassroom)
         ]
         settings = dict(
             debug=True

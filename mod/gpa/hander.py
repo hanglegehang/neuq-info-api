@@ -10,17 +10,14 @@ from util.r import AESCipher
 
 class GPAHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write('Herald Web Service')
-        self.finish()
+        self.post()
 
     def post(self):
-        body = json.loads(self.request.body.decode('utf-8'))
+        username = self.get_argument("username")
+        password = self.get_argument("password")
         crypt = AESCipher()
-        deParam = crypt.decrypt(body['raw_data'])
-        param = json.loads(deParam)
-        username = param['card_number']
-        password = param['password']
-        app_key = body['app_key']
+        password = crypt.decrypt(password)
+        # username = param['card_number']
         checkRes = authApi(username, password)
         if checkRes['code'] == 0:
             s = requests.Session()
@@ -32,26 +29,28 @@ class GPAHandler(tornado.web.RequestHandler):
                      'queryModel.currentPage': '1', 'queryModel.sortName': '', 'queryModel.sortOrder': 'asc',
                      'time': '1'}
             r2 = s.post(QUERY_URL2 % username, data=data3)
-            retjson = {'result': self.parser(r2.text), 'card_number': username}
+            retjson = self.parser(r2.text)
             # result = {'raw_data': crypt.encrypt(json.dumps(retjson)), 'code': 0, 'message': '', 'app_key': app_key}
-            result = {'raw_data': retjson, 'code': 0, 'message': '', 'app_key': app_key}
+            result = {'data': retjson, 'code': 0, 'message': ''}
             ret = json.dumps(result, ensure_ascii=False, indent=2)
             self.write(ret)
         self.finish()
 
     def parser(self, content):
-        result = {}
+        result = []
         itemData = json.loads(content)
         for item in itemData['items']:
             semester = item['xnmmc']
             term = item['xqmmc']
             xqKey = semester.split('-')[0] + "0" + term
-            if not result.has_key(xqKey):
-                result[xqKey] = []
-            result[xqKey].append({
-                'course_id': item['kch'],
-                'course_name': item['kcmc'],
+            result.append({
+                'courseId': item['kch'],
+                'courseName': item['kcmc'],
                 'score': item['cj'],
-                "gpa": item['jd']
+                'credit': item['xf'],
+                "gpa": item['jd'],
+                "examType": item['ksxz'],
+                "isExamInvalid": item['sfxwkc'],
+                "semester": xqKey
             })
         return result

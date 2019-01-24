@@ -7,6 +7,7 @@ import execjs
 import requests
 import time
 import tornado.web
+from bs4 import BeautifulSoup
 from requests import ConnectionError
 
 from config import *
@@ -14,7 +15,6 @@ from util.r import AESCipher
 
 
 class AuthHandler(tornado.web.RequestHandler):
-
     @tornado.web.asynchronous
     @tornado.gen.engine
     def get(self):
@@ -25,28 +25,24 @@ class AuthHandler(tornado.web.RequestHandler):
 
     def post(self):
         body = json.loads(self.request.body.decode('utf-8'))
-        crypt = AESCipher()
-        deParam = crypt.decrypt(body['raw_data'])
-        param = json.loads(deParam)
-        username = param['card_number']
-        password = param['password']
-        app_key = body['app_key']
+        username = body['username']
+        password = body['password']
         actResult = authApi(username, password)
-        actResult['app_key'] = app_key
-        del actResult['cookie']
-        print username + ' ' + password
-        self.write(actResult)
+        if (actResult.has_key('cookie')):
+            del actResult['cookie']
+        print json.dumps(actResult, ensure_ascii=False, indent=2)
+        self.write(json.dumps(actResult, ensure_ascii=False, indent=2))
         self.finish()
 
-def authApi(username, password):
 
+def authApi(username, password):
     result = {'code': 0, 'message': ''}
+    headers = header
+    s = requests.Session()
     try:
-        headers = header
-        s = requests.Session()
         s.headers.update(headers)
         # 访问首页
-        r1= s.get(INDEX_URL, timeout=TIME_OUT)
+        r1 = s.get(INDEX_URL, timeout=TIME_OUT)
         # 获取公钥
         r2 = s.get(PUBLIC_KEY_URL2)
         r2Json = json.loads(r2.text)
@@ -57,12 +53,24 @@ def authApi(username, password):
         # 登录验证
         r3 = s.post(CHECK_USER_USER, data={'yhm': username, 'mm': mypass},
                     allow_redirects=False)
-        s.close()
         if r3.is_redirect:
             crypt = AESCipher()
-            result['raw_data'] = crypt.encrypt(json.dumps({'card_number': 'username', 'name': '李航'}))
+            result['data'] = {"password": crypt.encrypt(password)}
             result['message'] = 'ok'
             result['cookie'] = r1.headers['Set-Cookie']
+            r4 = s.get(QUERY_INFO_URL)
+            studentId = BeautifulSoup(r4.text, 'html.parser').find(id='col_xh').find('p').string.strip()
+            studentName = BeautifulSoup(r4.text, 'html.parser').find(id='col_xm').find('p').string.strip()
+            grade = BeautifulSoup(r4.text, 'html.parser').find(id='col_njdm_id').find('p').string.strip()
+            userType = BeautifulSoup(r4.text, 'html.parser').find(id='col_xslbdm').find('p').string.strip()
+            profession = BeautifulSoup(r4.text, 'html.parser').find(id='col_zyh_id').find('p').string.strip()
+            college = BeautifulSoup(r4.text, 'html.parser').find(id='col_jg_id').find('p').string.strip()
+            result['data']['userType'] = userType
+            result['data']['studentName'] = studentName
+            result['data']['grade'] = grade
+            result['data']['studentId'] = studentId
+            result['data']['college'] = college
+            result['data']['profession'] = profession
         else:
             result['code'] = 401
     except requests.exceptions.ConnectTimeout:
@@ -72,8 +80,11 @@ def authApi(username, password):
         result['code'] = 400
         result['message'] = '连接错误'
     except Exception, e:
+        print Exception
         print e
         result['code'] = 500
+    finally:
+        s.close()
     return result
 
 
