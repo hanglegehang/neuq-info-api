@@ -24,15 +24,20 @@ class AuthHandler(tornado.web.RequestHandler):
         self.finish()
 
     def post(self):
+        startTime = int(round(time.time() * 1000))
+        print '教务认证并获取用户信息开始' + str(startTime)
         body = json.loads(self.request.body.decode('utf-8'))
         username = body['username']
         password = body['password']
         actResult = authApi(username, password)
         if (actResult.has_key('cookie')):
             del actResult['cookie']
-        print actResult
+
+        endTime = int(round(time.time() * 1000))
+        print '教务认证并获取用户信息结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']'
         self.write(json.dumps(actResult, ensure_ascii=False, indent=2))
         self.finish()
+
 
 def authApi(username, password):
     result = {'code': 0, 'message': ''}
@@ -88,7 +93,10 @@ def authApi(username, password):
         s.close()
     return result
 
+
 def auth(username, password):
+    startTime = int(round(time.time() * 1000))
+    print '教务认证开始' + str(startTime)
     result = {'code': 0, 'message': ''}
     headers = header
     s = requests.Session()
@@ -125,6 +133,8 @@ def auth(username, password):
         result['code'] = 500
     finally:
         s.close()
+    endTime = int(round(time.time() * 1000))
+    print '教务认证结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']'
     return result
 
 

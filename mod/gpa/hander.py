@@ -2,6 +2,7 @@
 # Created by lihang on 2017/3/25.
 import json
 import requests
+import time
 import tornado.gen
 from config import *
 from mod.auth.hander import auth
@@ -13,6 +14,8 @@ class GPAHandler(tornado.web.RequestHandler):
         self.post()
 
     def post(self):
+        startTime = int(round(time.time() * 1000))
+        print '获取学生成绩开始' + str(startTime)
         username = self.get_argument("username")
         password = self.get_argument("password")
         crypt = AESCipher()
@@ -32,6 +35,8 @@ class GPAHandler(tornado.web.RequestHandler):
             retjson = self.parser(r2.text)
             result = {'data': retjson, 'code': 0, 'message': ''}
             ret = json.dumps(result, ensure_ascii=False, indent=2)
+            endTime = int(round(time.time() * 1000))
+            print '获取学生成绩结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']'
             self.write(ret)
         self.finish()
 
