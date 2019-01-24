@@ -26,7 +26,7 @@ class AuthHandler(tornado.web.RequestHandler):
 
     def post(self):
         startTime = int(round(time.time() * 1000))
-        logging.info("教务认证并获取用户信息开始' + str(startTime)")
+        logging.info('教务认证并获取用户信息开始' + str(startTime))
         body = json.loads(self.request.body.decode('utf-8'))
         username = body['username']
         password = body['password']
