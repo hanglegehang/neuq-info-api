@@ -43,7 +43,6 @@ class GPAHandler(tornado.web.RequestHandler):
         self.finish()
 
     def parser(self, content):
-        print content
         result = []
         itemData = json.loads(content)
         for item in itemData['items']:
