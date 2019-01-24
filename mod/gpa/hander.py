@@ -2,7 +2,6 @@
 # Created by lihang on 2017/3/25.
 import json
 import requests
-import time
 import tornado.gen
 from config import *
 from mod.auth.hander import auth

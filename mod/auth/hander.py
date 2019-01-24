@@ -34,7 +34,7 @@ class AuthHandler(tornado.web.RequestHandler):
         self.write(json.dumps(actResult, ensure_ascii=False, indent=2))
         self.finish()
 
-def authApi(s,username, password):
+def authApi(username, password):
     result = {'code': 0, 'message': ''}
     headers = header
     s = requests.Session()
