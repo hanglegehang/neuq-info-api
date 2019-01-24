@@ -34,8 +34,61 @@ class AuthHandler(tornado.web.RequestHandler):
         self.write(json.dumps(actResult, ensure_ascii=False, indent=2))
         self.finish()
 
+def authApi(s,username, password):
+    result = {'code': 0, 'message': ''}
+    headers = header
+    s = requests.Session()
+    start = int(round(time.time() * 1000))
+    try:
+        s.headers.update(headers)
+        # 访问首页
+        r1 = s.get(INDEX_URL, timeout=TIME_OUT)
+        # 获取公钥
+        r2 = s.get(PUBLIC_KEY_URL2)
+        r2Json = json.loads(r2.text)
+        modulus = r2Json['modulus']
+        exponent = r2Json['exponent']
+        # 利用公钥加密密码
+        mypass = execjs.compile(open(r'sec.js').read().decode('utf-8')).call('doResult', modulus, exponent, password)
+        # 登录验证
+        r3 = s.post(CHECK_USER_USER, data={'yhm': username, 'mm': mypass},
+                    allow_redirects=False)
+        if r3.is_redirect:
+            crypt = AESCipher()
+            result['data'] = {"password": crypt.encrypt(password)}
+            result['message'] = 'ok'
+            result['cookie'] = r1.headers['Set-Cookie']
+            r4 = s.get(QUERY_INFO_URL)
+            ajaxForm = BeautifulSoup(r4.text, 'html.parser').find(id='func_fields')
+            studentId = ajaxForm.find(id='col_xh').find('p').string.strip()
+            studentName = ajaxForm.find(id='col_xm').find('p').string.strip()
+            grade = ajaxForm.find(id='col_njdm_id').find('p').string.strip()
+            userType = ajaxForm.find(id='col_xslbdm').find('p').string.strip()
+            profession = ajaxForm.find(id='col_zyh_id').find('p').string.strip()
+            college = ajaxForm.find(id='col_jg_id').find('p').string.strip()
+            result['data']['userType'] = userType
+            result['data']['studentName'] = studentName
+            result['data']['grade'] = grade
+            result['data']['studentId'] = studentId
+            result['data']['college'] = college
+            result['data']['profession'] = profession
+        else:
+            result['code'] = 401
+    except requests.exceptions.ConnectTimeout:
+        result['code'] = 408
+        result['message'] = '请求超时'
+    except ConnectionError:
+        result['code'] = 400
+        result['message'] = '连接错误'
+    except Exception, e:
+        print Exception
+        print e
+        result['code'] = 500
+    finally:
+        s.close()
+    return result
 
-def authApi(username, password):
+def auth(username, password):
     result = {'code': 0, 'message': ''}
     headers = header
     s = requests.Session()
@@ -58,19 +111,6 @@ def authApi(username, password):
             result['data'] = {"password": crypt.encrypt(password)}
             result['message'] = 'ok'
             result['cookie'] = r1.headers['Set-Cookie']
-            r4 = s.get(QUERY_INFO_URL)
-            studentId = BeautifulSoup(r4.text, 'html.parser').find(id='col_xh').find('p').string.strip()
-            studentName = BeautifulSoup(r4.text, 'html.parser').find(id='col_xm').find('p').string.strip()
-            grade = BeautifulSoup(r4.text, 'html.parser').find(id='col_njdm_id').find('p').string.strip()
-            userType = BeautifulSoup(r4.text, 'html.parser').find(id='col_xslbdm').find('p').string.strip()
-            profession = BeautifulSoup(r4.text, 'html.parser').find(id='col_zyh_id').find('p').string.strip()
-            college = BeautifulSoup(r4.text, 'html.parser').find(id='col_jg_id').find('p').string.strip()
-            result['data']['userType'] = userType
-            result['data']['studentName'] = studentName
-            result['data']['grade'] = grade
-            result['data']['studentId'] = studentId
-            result['data']['college'] = college
-            result['data']['profession'] = profession
         else:
             result['code'] = 401
     except requests.exceptions.ConnectTimeout:
