@@ -2,6 +2,7 @@
 # 认证模块接口
 # Created by lihang on 2017/3/22.
 import json
+import logging
 
 import execjs
 import requests
@@ -25,7 +26,7 @@ class AuthHandler(tornado.web.RequestHandler):
 
     def post(self):
         startTime = int(round(time.time() * 1000))
-        print '教务认证并获取用户信息开始' + str(startTime)
+        logging.info("教务认证并获取用户信息开始' + str(startTime)")
         body = json.loads(self.request.body.decode('utf-8'))
         username = body['username']
         password = body['password']
@@ -34,7 +35,7 @@ class AuthHandler(tornado.web.RequestHandler):
             del actResult['cookie']
 
         endTime = int(round(time.time() * 1000))
-        print '教务认证并获取用户信息结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']'
+        logging.info('教务认证并获取用户信息结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']')
         self.write(json.dumps(actResult, ensure_ascii=False, indent=2))
         self.finish()
 
@@ -96,7 +97,7 @@ def authApi(username, password):
 
 def auth(username, password):
     startTime = int(round(time.time() * 1000))
-    print '教务认证开始' + str(startTime)
+    logging.info('教务认证开始' + str(startTime))
     result = {'code': 0, 'message': ''}
     headers = header
     s = requests.Session()
@@ -134,7 +135,7 @@ def auth(username, password):
     finally:
         s.close()
     endTime = int(round(time.time() * 1000))
-    print '教务认证结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']'
+    logging.info('教务认证结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']')
     return result
 
 
