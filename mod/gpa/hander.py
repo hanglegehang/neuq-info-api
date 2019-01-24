@@ -43,6 +43,7 @@ class GPAHandler(tornado.web.RequestHandler):
         self.finish()
 
     def parser(self, content):
+        print content
         result = []
         itemData = json.loads(content)
         for item in itemData['items']:
@@ -54,7 +55,7 @@ class GPAHandler(tornado.web.RequestHandler):
                 'courseName': item['kcmc'],
                 'score': item['cj'],
                 'credit': item['xf'],
-                "gpa": item['jd'],
+                "gpa": item['jd'] if item.has_key('js') else '',
                 "examType": item['ksxz'],
                 "isExamInvalid": item['sfxwkc'],
                 "semester": xqKey
