@@ -129,8 +129,8 @@ def auth(username, password):
         result['code'] = 400
         result['message'] = '连接错误'
     except Exception, e:
-        print Exception
-        print e
+        logging.error('访问教务处错误', Exception)
+        logging.error('访问教务处错误', e)
         result['code'] = 500
     finally:
         s.close()
