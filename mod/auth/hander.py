@@ -35,7 +35,7 @@ class AuthHandler(tornado.web.RequestHandler):
             del actResult['cookie']
 
         endTime = int(round(time.time() * 1000))
-        logging.info('教务认证并获取用户信息结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']')
+        logging.info('教务认证并获取用户信息结束%s,耗时【%s】', str(endTime), str(endTime - startTime))
         self.write(json.dumps(actResult, ensure_ascii=False, indent=2))
         self.finish()
 
@@ -87,8 +87,8 @@ def authApi(username, password):
         result['code'] = 400
         result['message'] = '连接错误'
     except Exception, e:
-        print Exception
-        print e
+        logging.error('访问教务处错误', Exception)
+        logging.error('访问教务处错误', e)
         result['code'] = 500
     finally:
         s.close()

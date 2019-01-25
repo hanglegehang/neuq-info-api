@@ -40,6 +40,8 @@ class GPAHandler(tornado.web.RequestHandler):
             endTime = int(round(time.time() * 1000))
             logging.info('获取学生成绩结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']')
             self.write(ret)
+        else:
+            self.write(checkRes)
         self.finish()
 
     def parser(self, content):
