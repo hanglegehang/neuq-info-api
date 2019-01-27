@@ -33,7 +33,7 @@ class GPAHandler(tornado.web.RequestHandler):
                      'nd': '490076975086', 'queryModel.showCount': '100',
                      'queryModel.currentPage': '1', 'queryModel.sortName': '', 'queryModel.sortOrder': 'asc',
                      'time': '1'}
-            r2 = s.post(QUERY_URL2 % username, data=data3)
+            r2 = s.post(GPA_QUERY_URL, data=data3)
             retjson = self.parser(r2.text)
             result = {'data': retjson, 'code': 0, 'message': ''}
             ret = json.dumps(result, ensure_ascii=False, indent=2)
