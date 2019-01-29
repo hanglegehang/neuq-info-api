@@ -39,6 +39,7 @@ class GPAHandler(tornado.web.RequestHandler):
             ret = json.dumps(result, ensure_ascii=False, indent=2)
             endTime = int(round(time.time() * 1000))
             logging.info('获取学生成绩结束' + str(endTime) + '[耗时' + str(endTime - startTime) + ']')
+            self.set_header("Content-Type", "application/json")
             self.write(ret)
         else:
             self.write(checkRes)

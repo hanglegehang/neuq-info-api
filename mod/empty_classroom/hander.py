@@ -6,6 +6,8 @@ import logging
 import requests
 import time
 import tornado.gen
+from bs4 import BeautifulSoup
+
 from config import *
 from mod.auth.hander import authApi, auth
 from util.r import AESCipher
@@ -16,6 +18,7 @@ class EmptyClassroom(tornado.web.RequestHandler):
         self.post()
 
     def post(self):
+        response = ''
         startTime = int(round(time.time() * 1000))
         logging.info('获取空教室开始' + str(startTime))
         username = self.get_argument("username")
@@ -35,10 +38,15 @@ class EmptyClassroom(tornado.web.RequestHandler):
             headers = header
             headers['Cookie'] = checkRes['cookie']
             s.headers.update(header)
-            r1 = s.post(INEX_URL % campus)
-            r2 = s.post(TERM_CHECK_URL, data={'xnm': '2018', 'xqm': '3'})
-            print r1.text
-            print r2.text
+            logging.info('获取学期开始' + str(int(round(time.time() * 1000))))
+            r1 = s.post(INDEX_URL)
+            # r2 = s.post(TERM_CHECK_URL, data={'xnm': '2018', 'xqm': '3'})
+            termOption = BeautifulSoup(r1.text, 'html.parser').find(id='dm_cx')
+            yearTerm = termOption.find(selected='selected').attrs['value']
+            year = yearTerm.split('-')[0]
+            term = yearTerm.split('-')[1]
+            logging.info('获取学期结束' + str(int(round(time.time() * 1000))))
+
             weekParam = 0
             for i in week:
                 weekParam += 2 ** (i - 1)
@@ -48,41 +56,37 @@ class EmptyClassroom(tornado.web.RequestHandler):
             sectionParam = 0
             for i in section:
                 sectionParam += 2 ** (i - 1)
-            data = {'xqh_id': '3D669E6DAB06A186E053AB14CECA64B4', 'fwzt': 'cx', 'xnm': '2018', 'xqm': '3',
+            data = {'xqh_id': '3D669E6DAB06A186E053AB14CECA64B4', 'fwzt': 'cx',
+                    'xnm': year,  # 学年
+                    'xqm': term,  # 学期
                     'lh': buildingNumber,  # 楼号
                     'jyfs': '0',
                     'zcd': weekParam,  # 周次
                     'xqj': dayParam,  # 星期
                     'cdlb_id': roomType,  # 教室类型
                     'jcd': sectionParam,  # 节次
-                    'queryModel.showCount': '15', 'queryModel.currentPage': '1',
+                    'queryModel.showCount': '200', 'queryModel.currentPage': '1',
                     'queryModel.sortName': 'cdbh',
                     'queryModel.sortOrder': 'asc'}
             queryRes = s.post(QUERY_URL, data=data)
-            print queryRes.text
+            parseResult = self.parser(queryRes.text)
+            response = {'data': parseResult, 'code': 0, 'message': ''}
         endTime = int(round(time.time() * 1000))
         logging.info('获取空教室结束%s耗时【%s】', str(endTime), str(endTime - startTime))
-
-        # retjson = {'result': self.parser(r2.text), 'card_number': username}
-        # result = {'raw_data': crypt.encrypt(json.dumps(retjson)), 'code': 0, 'message': ''}
-        # # result = {'raw_data': retjson, 'code': 0, 'message': '', 'app_key': app_key}
-        # ret = json.dumps(result, ensure_ascii=False, indent=2)
-        self.write("1")
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(response, ensure_ascii=False))
         self.finish()
 
-    def parser(self, content):
-        result = {}
-        itemData = json.loads(content)
+    def parser(self, text):
+        result = []
+        itemData = json.loads(text)
         for item in itemData['items']:
-            semester = item['xnmmc']
-            term = item['xqmmc']
-            xqKey = semester.split('-')[0] + "0" + term
-            if not result.has_key(xqKey):
-                result[xqKey] = []
-            result[xqKey].append({
-                'course_id': item['kch'],
-                'course_name': item['kcmc'],
-                'score': item['cj'],
-                "gpa": item['jd']
+            cdjc = item['cdjc']
+            jxlmc = item['jxlmc']
+            lh = item['lh']
+            result.append({
+                'cdjc': cdjc,
+                'jxlmc': jxlmc,
+                'lh': lh,
             })
         return result

@@ -36,6 +36,7 @@ class AuthHandler(tornado.web.RequestHandler):
 
         endTime = int(round(time.time() * 1000))
         logging.info('教务认证并获取用户信息结束%s,耗时【%s】', str(endTime), str(endTime - startTime))
+        self.set_header("Content-Type", "application/json")
         self.write(json.dumps(actResult, ensure_ascii=False, indent=2))
         self.finish()
 
