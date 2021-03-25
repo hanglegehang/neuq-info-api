@@ -8,7 +8,7 @@ Naked==0.1.31
 pbr==3.1.1
 pycrypto==2.6.1
 PyExecJS==1.5.0
-PyYAML==3.12
+PyYAML==5.4
 requests==2.18.4
 shellescape==3.4.1
 singledispatch==3.4.0.3
